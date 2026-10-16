@@ -18,8 +18,8 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 
     <application android:label="@string/english_ime_name"
             android:name="helium314.keyboard.latin.App"
-            android:icon="@mipmap/ic_launcher"
-            android:roundIcon="@mipmap/ic_launcher_round"
+            android:icon="@drawable/keyva_icon"
+            android:roundIcon="@drawable/keyva_icon"
             android:supportsRtl="true"
             android:allowBackup="false"
             android:defaultToDeviceProtectedStorage="true"
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
         <activity android:name=".keyva.AiSettingsActivity" android:exported="false" android:directBootAware="false" android:excludeFromRecents="true" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
         <activity android:name="helium314.keyboard.settings.SettingsActivity"
                 android:theme="@style/platformActivityTheme"
-                android:icon="@mipmap/ic_launcher"
+                android:icon="@drawable/keyva_icon"
                 android:windowSoftInputMode="adjustResize"
                 android:exported="true">
             <intent-filter>
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
         <!-- separate activity that's used internally, only necessary in case the launcher icon is disabled on Android < 10 -->
         <activity android:name="helium314.keyboard.settings.SettingsActivity2"
             android:theme="@style/platformActivityTheme"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@drawable/keyva_icon"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <!-- intent filter for opening .dict files -->

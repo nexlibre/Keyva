@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name="helium314.keyboard.latin.keyva.SmokeActivity" android:exported="true" android:windowSoftInputMode="adjustResize|stateAlwaysVisible" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+    </application>
+</manifest>

@@ -37,7 +37,7 @@ public final class AiController {
     private View root;
     public AiController(LatinIME ime) { this.ime = ime; }
     public void attach(View view) {
-        root = view;
+        reset(); root = view;
         LinearLayout frame = view.findViewById(R.id.main_keyboard_frame);
         LinearLayout bar = new LinearLayout(ime); bar.setOrientation(LinearLayout.HORIZONTAL); bar.setBackgroundColor(Color.BLACK);
         add(bar,"Voz", this::dictate); add(bar,"IA", this::correctSelection); add(bar,"Deshacer", this::undo); add(bar,"Ajustes IA", this::settings);
@@ -59,7 +59,7 @@ public final class AiController {
     private void show(AlertDialog d) {
         if (dialog != null) dialog.dismiss(); dialog = d;
         Window w = d.getWindow();
-        if (root == null || root.getWindowToken() == null || w == null) return;
+        if (root == null || root.getWindowToken() == null || w == null) { dialog = null; return; }
         WindowManager.LayoutParams p = w.getAttributes(); p.token = root.getWindowToken(); p.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG; w.setAttributes(p);
         w.addFlags(WindowManager.LayoutParams.FLAG_SECURE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         d.setOnCancelListener(x -> reset());
@@ -83,6 +83,7 @@ public final class AiController {
             AlertDialog listen = new AlertDialog.Builder(ime).setTitle(local ? "Dictado local · es-NI" : "Dictado del proveedor · es-NI").setView(status)
                 .setPositiveButton("Terminar",null).setNegativeButton("Cancelar",(d,w) -> reset()).create();
             show(listen);
+            if (!listen.isShowing()) return;
             listen.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> { if (recognizer != null) recognizer.stopListening(); status.setText("Finalizando…"); });
             recognizer.setRecognitionListener(new RecognitionListener() {
                 public void onReadyForSpeech(Bundle b) { if (valid(token,connection)) status.setText("Escuchando… Hablá con naturalidad"); }
@@ -124,10 +125,11 @@ public final class AiController {
         EditText editor = new EditText(ime); editor.setText(text); editor.setMinLines(3); editor.setMaxLines(6); editor.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO); box.addView(editor);
         Spinner mode = new Spinner(ime); mode.setAdapter(new ArrayAdapter<>(ime,android.R.layout.simple_spinner_dropdown_item,new String[]{"Corrección básica","Corrección completa","Corrección de dictado","Conservar estilo","Mejorar redacción"})); mode.setSelection(dictation?2:3); box.addView(mode);
         Button correct = new Button(ime); correct.setText("Corregir con Gemini"); box.addView(correct);
-        Button restore = new Button(ime); restore.setText("Restaurar original"); box.addView(restore); restore.setOnClickListener(v -> { if(client!=null)client.cancel(); editor.setText(text); correct.setEnabled(true); });
+        Button restore = new Button(ime); restore.setText("Restaurar original"); box.addView(restore); restore.setOnClickListener(v -> { if(client!=null)client.cancel(); client=null; editor.setText(text); correct.setEnabled(true); });
         TextView status = new TextView(ime); box.addView(status);
         AlertDialog review = new AlertDialog.Builder(ime).setTitle("Keyva · Revisar texto").setView(box).setPositiveButton("Insertar",null).setNegativeButton("Cancelar",(d,w)->reset()).create();
         show(review);
+        if (!review.isShowing()) return;
         review.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             if (!valid(token,connection) || !selected(connection).equals(selection) || cursor(connection)!=initialCursor) { reset(); toast("El campo cambió. Volvé a seleccionar el texto."); return; }
             String result=editor.getText().toString();
