@@ -9,6 +9,10 @@ import android.widget.*;
 public final class SmokeActivity extends Activity {
     @Override public void onCreate(Bundle b) {
         super.onCreate(b);
+        if (getIntent().getBooleanExtra("recognition_fixture",false)) {
+            getPackageManager().setComponentEnabledSetting(new android.content.ComponentName(this,TestRecognitionService.class),
+                android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED, android.content.pm.PackageManager.DONT_KILL_APP);
+        }
         LinearLayout box=new LinearLayout(this); box.setOrientation(LinearLayout.VERTICAL);
         TextView title=new TextView(this); title.setText("Keyva test: local text only"); box.addView(title);
         if (getIntent().getBooleanExtra("storage_test",false)) {
@@ -29,6 +33,12 @@ public final class SmokeActivity extends Activity {
         input.setText(getIntent().getStringExtra("fixture") == null ? "" : getIntent().getStringExtra("fixture")); input.setSelection(input.length());
         if (getIntent().getBooleanExtra("private",false)) input.setImeOptions(android.view.inputmethod.EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
         Button select=new Button(this);select.setText("Select test message");box.addView(select);select.setOnClickListener(v->{input.requestFocus();input.selectAll();});
+        box.setOnApplyWindowInsetsListener((view,insets)->{
+            int bottom=insets.getInsets(android.view.WindowInsets.Type.ime()).bottom;
+            int screenHeight=getWindowManager().getCurrentWindowMetrics().getBounds().height();
+            title.setContentDescription(bottom>0 ? "ime_top:"+(screenHeight-bottom) : "");
+            return insets;
+        });
         setContentView(box);input.requestFocus();input.postDelayed(()->((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).showSoftInput(input,InputMethodManager.SHOW_IMPLICIT),500);
     }
 }

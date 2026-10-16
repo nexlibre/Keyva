@@ -40,7 +40,12 @@ def keyboard_bounds(tree):
     content=next(n for n in tree.iter('node') if n.attrib.get('resource-id')=='android:id/content')
     x,y,width,top=bounds(content)
     size=list(map(int,re.findall(r'\d+',adb('shell','wm','size'))))[-2:]
-    assert top < size[1]*0.85, 'App not resized for keyboard'
+    # Android 15+ edge-to-edge windows may not resize content; use OS-reported IME insets from the debug host.
+    markers=[n.attrib.get('content-desc','') for n in tree.iter('node') if n.attrib.get('content-desc','').startswith('ime_top:')]
+    if markers:
+        measured=int(markers[0].split(':')[1])
+        if 0 < measured < size[1]*0.85: top=measured
+    assert top < size[1]*0.85, 'No visible keyboard bounds from content or IME insets'
     return width,top
 def toolbar(index,width,top): adb('shell','input','tap',str(int(width*(index+0.5)/4)),str(int(top+24*density)))
 def key_touch(width,top): adb('shell','input','tap',str(width//4),str(int(top+110*density)))
@@ -85,7 +90,7 @@ assert any('Voz e inteligencia artificial' in n.attrib.get('text','') for n in t
 # Debug recognizer exercises Android SpeechRecognizer callbacks; this is NOT actual audio recognition.
 adb('shell','input','keyevent','4');time.sleep(0.5)
 adb('shell','pm','grant','org.nexlibre.keyva','android.permission.RECORD_AUDIO')
-adb('shell','pm','enable','org.nexlibre.keyva/helium314.keyboard.latin.keyva.TestRecognitionService')
+tree=launch_case('--ez','recognition_fixture','true')
 time.sleep(1)
 adb('shell','settings','put','secure','voice_recognition_service','org.nexlibre.keyva/helium314.keyboard.latin.keyva.TestRecognitionService')
 tree=launch_case();width,top=keyboard_bounds(tree)
