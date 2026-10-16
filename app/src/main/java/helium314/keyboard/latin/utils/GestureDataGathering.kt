@@ -165,7 +165,7 @@ object BackgroundGatheringCache {
 var useBackgroundGathering = false
 
 fun setUseBackgroundGathering(context: Context, editorInfo: EditorInfo): Boolean {
-    useBackgroundGathering = isBackgroundGatheringUsed(context, editorInfo)
+    useBackgroundGathering = false // Keyva: disable background gesture research collection
     if (!useBackgroundGathering)
         BackgroundGatheringCache.clear()
     return useBackgroundGathering

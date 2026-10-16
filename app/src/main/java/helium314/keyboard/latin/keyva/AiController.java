@@ -53,11 +53,15 @@ public final class AiController {
     }
     private void settings() { reset(); ime.startActivity(new Intent(ime,AiSettingsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
     private void toast(String message) { Toast.makeText(ime,message,Toast.LENGTH_LONG).show(); }
+    private boolean allowed() {
+        return AiPolicy.allowed(ime.getCurrentInputEditorInfo())
+            && !helium314.keyboard.latin.settings.Settings.getValues().mIncognitoModeEnabled;
+    }
     private boolean safe() {
-        if (!AiPolicy.allowed(ime.getCurrentInputEditorInfo())) { toast("Voz e IA no disponibles en campos sensibles o privados"); return false; }
+        if (!allowed()) { toast("Voz e IA no disponibles en campos sensibles o privados"); return false; }
         return ime.getCurrentInputConnection() != null;
     }
-    private boolean valid(int token, InputConnection connection) { return token == generation && AiPolicy.allowed(ime.getCurrentInputEditorInfo()) && connection == ime.getCurrentInputConnection(); }
+    private boolean valid(int token, InputConnection connection) { return token == generation && allowed() && connection == ime.getCurrentInputConnection(); }
     private void show(AlertDialog d) {
         if (dialog != null) dialog.dismiss(); dialog = d;
         Window w = d.getWindow();

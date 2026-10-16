@@ -5,7 +5,7 @@
 - Independent Keyva package and original launcher icon; Android 12 minimum.
 - Explicit Android dictation with local preference and provider disclosure.
 - Optional Gemini selected-text correction with review, cancellation and guarded undo.
-- Credential-protected encrypted API key settings; no embedded user key.
+- Encrypted API key settings guarded by device unlock; no embedded user key.
 - Sensitive-editor policy, ephemeral session state, network error handling.
 - CI build/signature/identity checks, policy tests and Android emulator smoke checks.
 

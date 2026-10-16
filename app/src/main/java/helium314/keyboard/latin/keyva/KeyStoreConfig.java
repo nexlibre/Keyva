@@ -15,19 +15,26 @@ import javax.crypto.spec.GCMParameterSpec;
 
 public final class KeyStoreConfig {
     private final SharedPreferences prefs;
+    private final android.os.UserManager userManager;
     private static final String ALIAS = "keyva.gemini.v1";
     public KeyStoreConfig(Context c) {
-        prefs = c.createCredentialProtectedStorageContext().getSharedPreferences("keyva_ai", Context.MODE_PRIVATE);
+        userManager = c.getSystemService(android.os.UserManager.class);
+        prefs = c.getSharedPreferences("keyva_ai", Context.MODE_PRIVATE);
+    }
+    private void requireUnlocked() {
+        if (userManager == null || !userManager.isUserUnlocked()) throw new IllegalStateException("Desbloqueá el teléfono para usar Gemini");
     }
     private SecretKey key() throws Exception {
+        requireUnlocked();
         KeyStore ks = KeyStore.getInstance("AndroidKeyStore"); ks.load(null);
         if (ks.containsAlias(ALIAS)) return (SecretKey) ks.getKey(ALIAS, null);
         KeyGenerator gen = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
         gen.init(new KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());
+            .setUnlockedDeviceRequired(true).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());
         return gen.generateKey();
     }
     public void save(String value, String model, boolean enabled) throws Exception {
+        requireUnlocked();
         if (!model.matches("gemini-[a-zA-Z0-9._-]{1,80}")) throw new IllegalArgumentException("Modelo inválido");
         SharedPreferences.Editor edit = prefs.edit().putString("model", model).putBoolean("enabled", enabled);
         if (!value.isEmpty()) {
@@ -38,6 +45,7 @@ public final class KeyStoreConfig {
         if (!edit.commit()) throw new IllegalStateException("No se pudo guardar");
     }
     public String read() throws Exception {
+        requireUnlocked();
         String value = prefs.getString("key", ""); if (value.isEmpty()) return "";
         Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
         c.init(Cipher.DECRYPT_MODE, key(), new GCMParameterSpec(128, Base64.decode(prefs.getString("iv", ""), Base64.NO_WRAP)));

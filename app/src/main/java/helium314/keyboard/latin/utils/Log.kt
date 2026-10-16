@@ -9,79 +9,20 @@ import java.util.Date
  * It's only a little slower than the android logger, but since both are used we end up at
  * half performance (still fast enough to not be noticeable, unless spamming thousands of log lines)
  */
+/** Keyva never records input-bearing diagnostic messages or keeps an in-memory log. */
+@Suppress("UNUSED_PARAMETER")
 object Log {
-    @JvmStatic
-    fun wtf(tag: String?, message: String) {
-        log(LogLine('F', tag, message))
-        android.util.Log.wtf(tag, message)
-    }
-
-    @JvmStatic
-    fun e(tag: String?, message: String, e: Throwable?) {
-        log(LogLine('E', tag, "$message\n${e?.stackTraceToString()}"))
-        android.util.Log.e(tag, message, e)
-    }
-
-    @JvmStatic
-    fun e(tag: String?, message: String) {
-        log(LogLine('E', tag, message))
-        android.util.Log.e(tag, message)
-    }
-
-    @JvmStatic
-    fun w(tag: String?, message: String, e: Throwable?) {
-        log(LogLine('W', tag, "$message\n${e?.stackTraceToString()}"))
-        android.util.Log.w(tag, message, e)
-    }
-
-    @JvmStatic
-    fun w(tag: String?, message: String) {
-        log(LogLine('W', tag, message))
-        android.util.Log.w(tag, message)
-    }
-
-    @JvmStatic
-    fun i(tag: String?, message: String, e: Throwable?) {
-        log(LogLine('I', tag, "$message\n${e?.stackTraceToString()}"))
-        android.util.Log.i(tag, message, e)
-    }
-
-    @JvmStatic
-    fun i(tag: String?, message: String) {
-        log(LogLine('I', tag, message))
-        android.util.Log.i(tag, message)
-    }
-
-    @JvmStatic
-    fun d(tag: String?, message: String, e: Throwable?) {
-        log(LogLine('D', tag, "$message\n${e?.stackTraceToString()}"))
-        android.util.Log.d(tag, message, e)
-    }
-
-    @JvmStatic
-    fun d(tag: String?, message: String) {
-        log(LogLine('D', tag, message))
-        android.util.Log.d(tag, message)
-    }
-
-    @JvmStatic
-    fun v(tag: String?, message: String) {
-        log(LogLine('V', tag, message))
-        android.util.Log.v(tag, message)
-    }
-
-    private fun log(line: LogLine) {
-        synchronized(logLines) {
-            if (logLines.size > 12000) // clear oldest entries if list gets too long
-                logLines.subList(0, 2000).clear()
-            logLines.add(line)
-        }
-    }
-
-    private val logLines: MutableList<LogLine> = ArrayList(2000)
-
-    /** returns a copy of [logLines] */
-    fun getLog(maxLines: Int = logLines.size) = synchronized(logLines) { logLines.takeLast(maxLines) }
+    @JvmStatic fun wtf(tag: String?, message: String) { android.util.Log.e(tag, "Keyva internal failure") }
+    @JvmStatic fun e(tag: String?, message: String, e: Throwable?) { android.util.Log.e(tag, "Keyva internal failure") }
+    @JvmStatic fun e(tag: String?, message: String) { android.util.Log.e(tag, "Keyva internal failure") }
+    @JvmStatic fun w(tag: String?, message: String, e: Throwable?) { }
+    @JvmStatic fun w(tag: String?, message: String) { }
+    @JvmStatic fun i(tag: String?, message: String, e: Throwable?) { }
+    @JvmStatic fun i(tag: String?, message: String) { }
+    @JvmStatic fun d(tag: String?, message: String, e: Throwable?) { }
+    @JvmStatic fun d(tag: String?, message: String) { }
+    @JvmStatic fun v(tag: String?, message: String) { }
+    fun getLog(maxLines: Int = 0): List<LogLine> = emptyList()
 }
 
 data class LogLine(val level: Char, val tag: String?, val message: String) {

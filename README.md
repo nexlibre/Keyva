@@ -12,7 +12,7 @@ Derivado independiente de [HeliBoard](https://github.com/HeliBorg/HeliBoard), co
 - Dictado Android: prefiere SpeechRecognizer local, si está disponible. El proveedor remoto requiere confirmación. Vista previa, terminar, cancelar e insertar; sin archivos de audio.
 - Corrección solo por acción explícita sobre texto seleccionado. Cinco modos, respeto al voseo y tono informal; instrucciones y contenido separados en la solicitud oficial Gemini REST.
 - Campo sensible/privado bloqueado antes de leer o enviar texto; resultados ligados a la conexión y sesión. Vista previa y revisión humana son necesarias: la IA puede equivocarse o seguir instrucciones maliciosas pese a las defensas.
-- Clave AES-GCM con Android Keystore en almacenamiento de credenciales; backup desactivado, sin claves en código ni logs del módulo. IA desactivada por defecto.
+- Clave AES-GCM con Android Keystore con uso de clave limitado al dispositivo desbloqueado; backup desactivado, sin claves en código ni logs del módulo. IA desactivada por defecto.
 - Red fuera del hilo principal, límites de longitud/tiempo, cancelación, errores de clave/cuota y conservación del original.
 
 ## Configurar desde Android
