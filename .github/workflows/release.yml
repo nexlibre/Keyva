@@ -58,7 +58,7 @@ jobs:
           umask 077
           printf '%s' "$STORE" | base64 --decode > "$RUNNER_TEMP/keyva-release.jks"
           trap 'rm -f "$RUNNER_TEMP/keyva-release.jks"' EXIT
-          APK=$(find app/build/outputs/apk/release -name '*unsigned.apk' -print -quit)
+          APK=$(find app/build/outputs/apk/release -name '*.apk' -print -quit)
           test -n "$APK"
           mkdir -p publication
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$RUNNER_TEMP/keyva-release.jks" --ks-key-alias "$KEYVA_KEY_ALIAS" --ks-pass env:KEYVA_STORE_PASSWORD --key-pass env:KEYVA_KEY_PASSWORD --out publication/Keyva-1.0.0-beta.1.apk "$APK"

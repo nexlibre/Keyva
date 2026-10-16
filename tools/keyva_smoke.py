@@ -85,6 +85,8 @@ assert any('Voz e inteligencia artificial' in n.attrib.get('text','') for n in t
 # Debug recognizer exercises Android SpeechRecognizer callbacks; this is NOT actual audio recognition.
 adb('shell','input','keyevent','4');time.sleep(0.5)
 adb('shell','pm','grant','org.nexlibre.keyva','android.permission.RECORD_AUDIO')
+adb('shell','pm','enable','org.nexlibre.keyva/helium314.keyboard.latin.keyva.TestRecognitionService')
+time.sleep(1)
 adb('shell','settings','put','secure','voice_recognition_service','org.nexlibre.keyva/helium314.keyboard.latin.keyva.TestRecognitionService')
 tree=launch_case();width,top=keyboard_bounds(tree)
 def start_fixture():
