@@ -29,6 +29,8 @@ jobs:
         run: ./gradlew testDebugNoMinifyUnitTest --tests '*keyva*' --stacktrace
       - name: Compile installable development APK
         run: ./gradlew assembleDebugNoMinify --stacktrace
+      - name: Compile optimized unsigned release candidate
+        run: ./gradlew assembleRelease --stacktrace
       - name: Verify identity and signature
         run: |
           APK=$(find app/build/outputs/apk/debugNoMinify -name '*.apk' -print -quit)
@@ -48,6 +50,10 @@ jobs:
             apk-identity.txt
             dependencies.txt
       - uses: actions/upload-artifact@v4
+        with:
+          name: Keyva-unsigned-release-candidate-${{ github.sha }}
+          path: app/build/outputs/apk/release/*.apk
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: unit-test-reports
@@ -59,7 +65,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api: [31, 33]
+        api: [31, 33, 35]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4

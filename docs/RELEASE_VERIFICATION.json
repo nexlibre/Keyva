@@ -1,0 +1,7 @@
+{
+  "source_commit": "",
+  "real_microphone": false,
+  "real_gemini": false,
+  "traditional_keyboard": false,
+  "notes": "Not approved for publication: actual speech recognition, fresh-key Gemini and traditional keyboard acceptance remain pending. Simulated recognition and HTTP fixtures do not satisfy these checks."
+}

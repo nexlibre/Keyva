@@ -198,7 +198,7 @@ public final class AiController {
             correct.setEnabled(false); status.setText("Corrigiendo… Podés cancelar sin perder el original.");
             GeminiClient request=new GeminiClient(); if(client!=null)client.cancel(); client=request;
             worker.execute(() -> {
-                try { String result=request.correct(input,style,config); main.post(() -> { if(valid(token,connection)&&review.isShowing()&&client==request) { editor.setText(result); status.setText("Resultado listo. Revisalo antes de insertar."); correct.setEnabled(true); } }); }
+                try { String result=request.correct(input,style,config); main.post(() -> { if(valid(token,connection)&&review.isShowing()&&client==request) { if (editor.getText().toString().equals(input)) { editor.setText(result); status.setText("Resultado listo. Revisalo antes de insertar."); } else status.setText("Editaste la vista previa durante la solicitud. Se conservan tus cambios."); correct.setEnabled(true); } }); }
                 catch(Exception e) { main.post(() -> { if(valid(token,connection)&&review.isShowing()&&client==request) { status.setText(e instanceof IllegalStateException ? e.getMessage() : "Error de red o configuración. El original se conserva."); correct.setEnabled(true); } }); }
             });
         });

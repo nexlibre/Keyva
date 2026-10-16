@@ -16,13 +16,15 @@ import javax.crypto.spec.GCMParameterSpec;
 public final class KeyStoreConfig {
     private final SharedPreferences prefs;
     private final android.os.UserManager userManager;
+    private final android.app.KeyguardManager keyguardManager;
     private static final String ALIAS = "keyva.gemini.v1";
     public KeyStoreConfig(Context c) {
         userManager = c.getSystemService(android.os.UserManager.class);
+        keyguardManager = c.getSystemService(android.app.KeyguardManager.class);
         prefs = c.getSharedPreferences("keyva_ai", Context.MODE_PRIVATE);
     }
     private void requireUnlocked() {
-        if (userManager == null || !userManager.isUserUnlocked()) throw new IllegalStateException("Desbloqueá el teléfono para usar Gemini");
+        if (userManager == null || !userManager.isUserUnlocked() || (keyguardManager != null && keyguardManager.isDeviceLocked())) throw new IllegalStateException("Desbloqueá el teléfono para usar Gemini");
     }
     private SecretKey key() throws Exception {
         requireUnlocked();

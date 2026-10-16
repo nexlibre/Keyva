@@ -82,5 +82,23 @@ adb('shell','pm','revoke','org.nexlibre.keyva','android.permission.RECORD_AUDIO'
 toolbar(0,width,top);time.sleep(1)
 tree=hierarchy('microphone-denied.xml')
 assert any('Voz e inteligencia artificial' in n.attrib.get('text','') for n in tree.iter('node')), 'Denied mic did not open settings'
+# Debug recognizer exercises Android SpeechRecognizer callbacks; this is NOT actual audio recognition.
+adb('shell','input','keyevent','4');time.sleep(0.5)
+adb('shell','pm','grant','org.nexlibre.keyva','android.permission.RECORD_AUDIO')
+adb('shell','settings','put','secure','voice_recognition_service','org.nexlibre.keyva/helium314.keyboard.latin.keyva.TestRecognitionService')
+tree=launch_case();width,top=keyboard_bounds(tree)
+def start_fixture():
+    toolbar(0,width,top);time.sleep(0.5)
+    tree=hierarchy('voice-consent.xml');tap(find_text(tree,'Usar proveedor'));time.sleep(1)
+    tree=hierarchy('listening-fixture.xml');assert any('Escuchando' in n.attrib.get('text','') for n in tree.iter('node')), 'Recognizer did not signal ready'
+    return tree
+tree=start_fixture();tap(find_text(tree,'Cancelar'));time.sleep(0.5)
+assert host_text(hierarchy('voice-cancelled.xml')) in ('','Test message'), 'Cancelled recognition changed host'
+tree=start_fixture();tap(find_text(tree,'Terminar'));time.sleep(1)
+tree=hierarchy('voice-result-fixture.xml');assert draft_text(tree)=='vos tenes tiempo', 'Recognizer callback did not reach preview'
+tap(find_text(tree,'Insertar'));time.sleep(0.5)
+assert host_text(hierarchy('voice-inserted.xml'))=='vos tenes tiempo', 'Dictation fixture insert failed'
+toolbar(2,width,top);time.sleep(0.5)
+assert host_text(hierarchy('voice-undone.xml')) in ('','Test message'), 'Dictation fixture undo failed'
 logs=adb('logcat','-d','-s','AndroidRuntime:E');assert 'FATAL EXCEPTION' not in logs,logs
-print('PASS: install/default IME, offline key input, encrypted config roundtrip/delete, real-key draft editing, cancel, exact insertion/undo, password/private refusal and denied microphone handling. Actual ASR and Gemini remain pending.',flush=True)
+print('PASS: install/default IME, offline key input, encrypted config roundtrip/delete, real-key draft editing, cancel, exact insertion/undo, password/private refusal and denied microphone handling, recognition fixture ready/stop/result/cancel and dictation undo. Actual ASR and Gemini remain pending.',flush=True)
