@@ -1,12 +1,12 @@
 # Beta 1.0.0 release gate
 
-Status: development, not a verified beta. No release may be published based only on compilation.
+Status: development, not a verified beta. Build and privacy policy unit tests passed in [run 38843209804](https://github.com/nexlibre/Keyva/actions/runs/38843209804) on 2026-10-16 UTC (2026-10-15 Nicaragua). Emulator checks are still running at the time of this update. No release may be published based only on compilation.
 
 | Check | Evidence / status |
 |---|---|
 | Source and history import | Upstream HeliBoard main 0c60dffb03a4e2e7a37cb82210f5299f93c03979; GPL-3.0 and other license files retained |
-| Privacy policy unit tests | CI runs API 31 Robolectric; results in reports |
-| APK compilation, package, signature | CI checks org.nexlibre.keyva, API 31, apksigner and SHA256; development signing only |
+| Privacy policy unit tests | PASS: API 31 Robolectric; reports attached to the linked run |
+| APK compilation, package, signature | PASS: org.nexlibre.keyva, API 31, apksigner verified; development signing only. APK SHA256: 21f8727b53d9af5b8768e292ba5b402765afcea803d5a17f758f02fc619a8cb4 |
 | Install, IME enable/default, settings launch | CI emulator smoke checks Android 12 and 13 |
 | Actual letters, numbers, symbols, languages, suggestions and correction | Pending interactive/device testing |
 | Clipboard, emoji, themes, height, vibration | Preserved upstream; pending regression testing |
