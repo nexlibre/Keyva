@@ -34,6 +34,7 @@ public final class AiController {
     private String undoBefore, undoAfter;
     private int undoCursor = -1;
     private InputConnection undoConnection;
+    private EditText draftEditor;
     private View root;
     private View toolbar;
     public int toolbarHeight() { return toolbar != null && toolbar.isShown() ? toolbar.getHeight() : 0; }
@@ -50,6 +51,27 @@ public final class AiController {
         Button b = new Button(ime); b.setText(text); b.setTextSize(12); b.setTextColor(Color.WHITE); b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(25,25,25)));
         b.setPadding(0,0,0,0); b.setMinWidth(0); b.setContentDescription(text);
         bar.addView(b, new LinearLayout.LayoutParams(0,-1,1)); b.setOnClickListener(v -> action.run());
+    }
+    public boolean editDraft(String text) {
+        if (draftEditor == null || dialog == null || !dialog.isShowing()) return false;
+        int start = Math.max(0, draftEditor.getSelectionStart()), end = Math.max(0, draftEditor.getSelectionEnd());
+        draftEditor.getText().replace(Math.min(start,end), Math.max(start,end), text);
+        return true;
+    }
+    public boolean handleDraft(helium314.keyboard.event.Event event) {
+        if (draftEditor == null || dialog == null || !dialog.isShowing()) return false;
+        int code = event.getKeyCode();
+        if (code == helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode.DELETE) {
+            draftEditor.onKeyDown(android.view.KeyEvent.KEYCODE_DEL, new android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.KEYCODE_DEL));
+        } else if (event.getCodePoint() > 0 && Character.isValidCodePoint(event.getCodePoint())) {
+            editDraft(new String(Character.toChars(event.getCodePoint())));
+        } else if (event.getTextToCommit() != null && event.getTextToCommit().length() > 0) {
+            editDraft(event.getTextToCommit().toString());
+        } else {
+            // Layout/shift changes are view-only; never let draft keys modify the host field.
+            ime.keyvaDraftLayoutEvent(event);
+        }
+        return true;
     }
     private void settings() { reset(); ime.startActivity(new Intent(ime,AiSettingsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
     private void toast(String message) { Toast.makeText(ime,message,Toast.LENGTH_LONG).show(); }
@@ -80,13 +102,20 @@ public final class AiController {
             .setMessage("No hay reconocimiento local disponible. El proveedor de voz de Android puede enviar audio a sus servidores y usar internet. ¿Usar este proveedor para este dictado?")
             .setPositiveButton("Usar proveedor", (d,w) -> startVoice(false)).setNegativeButton("Cancelar",(d,w) -> reset()).create());
     }
+    private void confirmProvider(String message) {
+        if (!safe()) return;
+        show(new AlertDialog.Builder(ime).setTitle("Dictado del proveedor")
+            .setMessage(message + " El proveedor de Android puede enviar audio a sus servidores y usar internet. ¿Usarlo para este dictado?")
+            .setPositiveButton("Usar proveedor", (d,w) -> startVoice(false)).setNegativeButton("Cancelar", (d,w) -> reset()).create());
+    }
     private void startVoice(boolean local) {
         if (!safe()) return;
         final int token = generation; final InputConnection connection = ime.getCurrentInputConnection();
+        final String language = new KeyStoreConfig(ime).speechLanguage();
         try {
             recognizer = local ? SpeechRecognizer.createOnDeviceSpeechRecognizer(ime) : SpeechRecognizer.createSpeechRecognizer(ime);
             TextView status = new TextView(ime); status.setPadding(24,24,24,24); status.setText("Preparando micrófono…");
-            AlertDialog listen = new AlertDialog.Builder(ime).setTitle(local ? "Dictado local · es-NI" : "Dictado del proveedor · es-NI").setView(status)
+            AlertDialog listen = new AlertDialog.Builder(ime).setTitle((local ? "Dictado local · " : "Dictado del proveedor · ") + language).setView(status)
                 .setPositiveButton("Terminar",null).setNegativeButton("Cancelar",(d,w) -> reset()).create();
             show(listen);
             if (!listen.isShowing()) return;
@@ -95,7 +124,12 @@ public final class AiController {
                 public void onReadyForSpeech(Bundle b) { if (valid(token,connection)) status.setText("Escuchando… Hablá con naturalidad"); }
                 public void onBeginningOfSpeech() {} public void onRmsChanged(float v) {} public void onBufferReceived(byte[] b) {}
                 public void onEndOfSpeech() { status.setText("Procesando…"); }
-                public void onError(int error) { if (!valid(token,connection)) return; reset(); toast("No se pudo reconocer la voz ("+error+"). Revisá permisos, idioma y servicio de voz. No se ha insertado texto."); }
+                public void onError(int error) {
+                    if (!valid(token,connection)) return; reset();
+                    if (local && (error == SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED || error == SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE) && SpeechRecognizer.isRecognitionAvailable(ime)) {
+                        confirmProvider("El idioma " + language + " no está disponible en el motor local. Podés instalarlo o cambiar el idioma en Ajustes IA.");
+                    } else toast("No se pudo reconocer la voz ("+error+"). Revisá permisos, idioma y servicio. No se ha insertado texto.");
+                }
                 public void onResults(Bundle b) {
                     if (!valid(token,connection)) return;
                     ArrayList<String> values = b.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -107,7 +141,7 @@ public final class AiController {
                 public void onEvent(int type, Bundle b) {}
             });
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                .putExtra(RecognizerIntent.EXTRA_LANGUAGE,"es-NI").putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS,true);
+                .putExtra(RecognizerIntent.EXTRA_LANGUAGE,language).putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS,true);
             if (local) intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE,true);
             recognizer.startListening(intent);
             main.postDelayed(() -> { if (valid(token,connection) && recognizer != null) { reset(); toast("Dictado detenido tras 90 segundos"); } },90000);
@@ -128,19 +162,29 @@ public final class AiController {
         final int initialCursor = cursor(connection);
         LinearLayout box = new LinearLayout(ime); box.setPadding(20,12,20,12); box.setOrientation(LinearLayout.VERTICAL);
         TextView notice = new TextView(ime); notice.setText("Revisá el resultado. Corregir envía solo este texto a Google. Insertar requiere que el campo y la selección sigan iguales."); box.addView(notice);
-        EditText editor = new EditText(ime); editor.setText(text); editor.setMinLines(3); editor.setMaxLines(6); editor.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO); box.addView(editor);
+        EditText editor = new EditText(ime); editor.setContentDescription("keyva_draft"); editor.setShowSoftInputOnFocus(false); editor.setText(text); editor.setSelection(text.length()); editor.setMinLines(3); editor.setMaxLines(6); editor.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO); box.addView(editor);
         Spinner mode = new Spinner(ime); mode.setAdapter(new ArrayAdapter<>(ime,android.R.layout.simple_spinner_dropdown_item,new String[]{"Corrección básica","Corrección completa","Corrección de dictado","Conservar estilo","Mejorar redacción"})); mode.setSelection(dictation?2:3); box.addView(mode);
         Button correct = new Button(ime); correct.setText("Corregir con Gemini"); box.addView(correct);
         Button restore = new Button(ime); restore.setText("Restaurar original"); box.addView(restore); restore.setOnClickListener(v -> { if(client!=null)client.cancel(); client=null; editor.setText(text); correct.setEnabled(true); });
         TextView status = new TextView(ime); box.addView(status);
-        AlertDialog review = new AlertDialog.Builder(ime).setTitle("Keyva · Revisar texto").setView(box).setPositiveButton("Insertar",null).setNegativeButton("Cancelar",(d,w)->reset()).create();
+        ScrollView scroll = new ScrollView(ime); scroll.addView(box);
+        AlertDialog review = new AlertDialog.Builder(ime).setTitle("Keyva · Revisar texto").setView(scroll).setPositiveButton("Insertar",null).setNegativeButton("Cancelar",(d,w)->reset()).create();
         show(review);
         if (!review.isShowing()) return;
+        draftEditor = editor; editor.requestFocus();
+        review.setCanceledOnTouchOutside(false);
+        review.getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+        review.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        review.getWindow().setGravity(android.view.Gravity.TOP);
+        int[] keyboardPosition = new int[2]; toolbar.getLocationOnScreen(keyboardPosition);
+        int available = keyboardPosition[1] - (int)(32 * ime.getResources().getDisplayMetrics().density);
+        review.getWindow().setLayout(-1, Math.max((int)(200 * ime.getResources().getDisplayMetrics().density), available));
+        review.setOnDismissListener(d -> { if (draftEditor == editor) draftEditor = null; });
         review.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             if (!valid(token,connection) || !selected(connection).equals(selection) || cursor(connection)!=initialCursor) { reset(); toast("El campo cambió. Volvé a seleccionar el texto."); return; }
             String result=editor.getText().toString();
             if (result.isEmpty() || result.length()>16000) { toast("El texto está vacío o es demasiado largo"); return; }
-            connection.finishComposingText(); connection.beginBatchEdit();
+            ime.keyvaPrepareEdit(); connection.beginBatchEdit();
             boolean ok=connection.commitText(result,1); connection.endBatchEdit();
             if (ok) { undoBefore=selection; undoAfter=result; undoCursor=cursor(connection); undoConnection=connection; }
             review.dismiss(); dialog=null; if(client!=null)client.cancel(); editor.setText("");
@@ -168,6 +212,6 @@ public final class AiController {
     }
     private void clearUndo() { undoBefore=null; undoAfter=null; undoConnection=null; undoCursor=-1; }
     private void stopVoice() { SpeechRecognizer r=recognizer; recognizer=null; if(r!=null) { r.cancel(); r.destroy(); } }
-    public void reset() { generation++; main.removeCallbacksAndMessages(null); stopVoice(); if(client!=null) { client.cancel(); client=null; } if(dialog!=null) { dialog.dismiss(); dialog=null; } clearUndo(); }
+    public void reset() { draftEditor=null; generation++; main.removeCallbacksAndMessages(null); stopVoice(); if(client!=null) { client.cancel(); client=null; } if(dialog!=null) { dialog.dismiss(); dialog=null; } clearUndo(); }
     public void close() { reset(); worker.shutdownNow(); root=null; }
 }

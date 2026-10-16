@@ -39,6 +39,14 @@ public final class AiSettingsActivity extends Activity {
         });
         add(box,"Cancelar prueba", () -> { if (client != null) client.cancel(); status.setText("Cancelado"); });
         add(box,"Eliminar clave y desactivar IA", () -> { try { if (client != null) client.cancel(); config.clear(); key.setText(""); enabled.setChecked(false); status.setText("Clave eliminada"); } catch (Exception e) { status.setText("No se pudo eliminar"); } });
+        TextView languageLabel = new TextView(this); languageLabel.setText("Idioma de dictado (si es-NI no está instalado, probá es-US)"); box.addView(languageLabel);
+        Spinner language = new Spinner(this); String[] languages = {"es-NI","es-US","es-ES","en-US"};
+        language.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, languages));
+        language.setSelection(java.util.Arrays.asList(languages).indexOf(config.speechLanguage())); box.addView(language);
+        language.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) { config.speechLanguage(languages[position]); }
+            public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+        });
         add(box,"Permitir micrófono", () -> requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 7));
         TextView voice = new TextView(this); voice.setText("Después del permiso, volvé al campo de escritura y pulsá Voz. El reconocimiento local depende del dispositivo y del idioma instalado. Si falla, no se cambia automáticamente a reconocimiento en línea. No se guarda audio.\n\nLa corrección usa la selección actual; seleccioná el mensaje antes de pulsar IA. Deshacer solo opera inmediatamente sobre el último reemplazo, sin cambios de selección ni escritura."); box.addView(voice);
         add(box,"Volver", this::finish);

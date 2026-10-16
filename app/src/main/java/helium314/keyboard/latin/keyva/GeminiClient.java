@@ -11,6 +11,10 @@ import javax.net.ssl.HttpsURLConnection;
 import java.net.URL;
 
 public final class GeminiClient {
+    interface ConnectionFactory { HttpsURLConnection open(URL url) throws Exception; }
+    private final ConnectionFactory factory;
+    public GeminiClient() { this(url -> (HttpsURLConnection) url.openConnection()); }
+    GeminiClient(ConnectionFactory factory) { this.factory = factory; }
     private volatile HttpsURLConnection connection;
     private final AtomicBoolean cancelled = new AtomicBoolean();
     public void cancel() { cancelled.set(true); HttpsURLConnection c = connection; if (c != null) c.disconnect(); }
@@ -22,7 +26,7 @@ public final class GeminiClient {
         JSONObject body = new JSONObject().put("systemInstruction", new JSONObject().put("parts", new JSONArray().put(new JSONObject().put("text", AiPolicy.instruction(mode)))))
             .put("contents", new JSONArray().put(new JSONObject().put("role", "user").put("parts", new JSONArray().put(new JSONObject().put("text", text)))))
             .put("generationConfig", new JSONObject().put("temperature", 0.1).put("maxOutputTokens", 8192));
-        HttpsURLConnection c = (HttpsURLConnection) new URL("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent").openConnection();
+        HttpsURLConnection c = factory.open(new URL("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent"));
         connection = c;
         try {
             if (cancelled.get()) throw new InterruptedException();

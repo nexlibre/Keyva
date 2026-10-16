@@ -30,7 +30,7 @@ public final class KeyStoreConfig {
         if (ks.containsAlias(ALIAS)) return (SecretKey) ks.getKey(ALIAS, null);
         KeyGenerator gen = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
         gen.init(new KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-            .setUnlockedDeviceRequired(true).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());
+            .setUnlockedDeviceRequired(android.os.Build.VERSION.SDK_INT >= 35).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());
         return gen.generateKey();
     }
     public void save(String value, String model, boolean enabled) throws Exception {
@@ -50,6 +50,11 @@ public final class KeyStoreConfig {
         Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
         c.init(Cipher.DECRYPT_MODE, key(), new GCMParameterSpec(128, Base64.decode(prefs.getString("iv", ""), Base64.NO_WRAP)));
         return new String(c.doFinal(Base64.decode(value, Base64.NO_WRAP)), StandardCharsets.UTF_8);
+    }
+    public String speechLanguage() { return prefs.getString("speech_language", "es-NI"); }
+    public void speechLanguage(String language) {
+        if (!java.util.Arrays.asList("es-NI", "es-US", "es-ES", "en-US").contains(language)) throw new IllegalArgumentException("Idioma inválido");
+        prefs.edit().putString("speech_language", language).apply();
     }
     public String model() { return prefs.getString("model", "gemini-2.5-flash-lite"); }
     public boolean enabled() { return prefs.getBoolean("enabled", false); }
