@@ -2,7 +2,7 @@
 
 **Beta 1.0.0 en desarrollo. Todavía no hay una release verificada ni APK de beta publicado.**
 
-[Compilaciones y APK de desarrollo (Actions)](https://github.com/nexlibre/Keyva/actions/workflows/keyva-ci.yml) · [Releases](https://github.com/nexlibre/Keyva/releases) · [Pruebas y pendientes](docs/VALIDATION.md)
+[Descargar APK de desarrollo (ZIP de Actions)](https://github.com/nexlibre/Keyva/actions/runs/38843209804/artifacts/12022445909) · [Compilaciones y APK de desarrollo (Actions)](https://github.com/nexlibre/Keyva/actions/workflows/keyva-ci.yml) · [Releases](https://github.com/nexlibre/Keyva/releases) · [Pruebas y pendientes](docs/VALIDATION.md)
 
 Derivado independiente de [HeliBoard](https://github.com/HeliBorg/HeliBoard), con historial, licencia GPL-3.0 y créditos conservados. Android mínimo: **12 (API 31)**. Identidad: `org.nexlibre.keyva`. No modifica el proyecto original ni incorpora código de SwiftKey/Typeless.
 
