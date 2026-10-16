@@ -1,7 +1,9 @@
 {
-  "source_commit": "",
+  "source_commit": "1115b56ad7d8e3a4429f678e40eb94e3a60b903d",
   "real_microphone": false,
   "real_gemini": false,
   "traditional_keyboard": false,
-  "notes": "Not approved for publication: actual speech recognition, fresh-key Gemini and traditional keyboard acceptance remain pending. Simulated recognition and HTTP fixtures do not satisfy these checks."
+  "notes": "Nine policy/HTTP fixture tests and expanded Android 12/13/15 emulator checks passed. Actual microphone/ASR, fresh-key Gemini, full traditional keyboard acceptance and permanent signing remain unverified; simulated recognition does not satisfy real acceptance.",
+  "development_apk_sha256": "937a952b2ca6a763d2d7f9efa3d54cafe164d67784b9c76fee51370c942132bb",
+  "automated_ci_run": 38892865907
 }
