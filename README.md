@@ -2,7 +2,7 @@
 
 **Beta 1.0.0 en desarrollo. Todavía no hay una release verificada ni APK de beta publicado.**
 
-[Descargar APK de desarrollo (ZIP de Actions)](https://github.com/nexlibre/Keyva/actions/runs/38843209804/artifacts/12022445909) · [Compilaciones y APK de desarrollo (Actions)](https://github.com/nexlibre/Keyva/actions/workflows/keyva-ci.yml) · [Releases](https://github.com/nexlibre/Keyva/releases) · [Pruebas y pendientes](docs/VALIDATION.md)
+[Descargar APK de desarrollo (ZIP de Actions)](https://github.com/nexlibre/Keyva/actions/runs/38843925323/artifacts/12022752519) · [Compilaciones y APK de desarrollo (Actions)](https://github.com/nexlibre/Keyva/actions/workflows/keyva-ci.yml) · [Releases](https://github.com/nexlibre/Keyva/releases) · [Pruebas y pendientes](docs/VALIDATION.md)
 
 Derivado independiente de [HeliBoard](https://github.com/HeliBorg/HeliBoard), con historial, licencia GPL-3.0 y créditos conservados. Android mínimo: **12 (API 31)**. Identidad: `org.nexlibre.keyva`. No modifica el proyecto original ni incorpora código de SwiftKey/Typeless.
 
@@ -23,6 +23,8 @@ Derivado independiente de [HeliBoard](https://github.com/HeliBorg/HeliBoard), co
 5. Para dictado, permitir micrófono desde Ajustes IA, volver al campo y pulsar Voz. El idioma inicial es es-NI; la disponibilidad local depende del dispositivo y paquetes instalados.
 
 La escritura convencional funciona sin internet. Esta variante añade permisos INTERNET y RECORD_AUDIO: **la garantía de HeliBoard de no tener permiso de internet ya no aplica a Keyva**. El reconocimiento remoto usa el proveedor de Android; Gemini recibe solo texto confirmado. El nivel gratuito de Google puede usar contenido para mejorar productos; evitá datos privados. Cuotas, modelos y disponibilidad cambian. Keyva no activa facturación, pero tampoco puede impedir cargos si se usa una clave de un proyecto con facturación. Consultar [precios](https://ai.google.dev/gemini-api/docs/pricing) y [límites oficiales](https://ai.google.dev/gemini-api/docs/rate-limits).
+
+**Verificado en CI:** compilación, firma de desarrollo, identificador, mínimo Android 12 y tres pruebas unitarias de privacidad. En emuladores Android 12 y 13 se instaló, activó como IME predeterminado, escribió con una pulsación real y abrió la vista previa IA sin cierre en ese recorrido. [Ejecución y evidencias](https://github.com/nexlibre/Keyva/actions/runs/38843925323).
 
 ## Estado y licencia
 La compilación no demuestra que el dictado, Gemini o todas las funciones tradicionales funcionen en un teléfono. [VALIDATION.md](docs/VALIDATION.md) separa automatización y pruebas pendientes. La release Beta 1.0.0 está retenida hasta completar la aceptación. Pendientes: prueba real con clave nueva, micrófono, regresiones de teclado y firma estable de publicación. Enviar audio directamente a Gemini y un tema Liquid Glass se posponen.
