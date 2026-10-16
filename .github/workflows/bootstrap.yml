@@ -1,6 +1,8 @@
 name: Import HeliBoard
 on:
   workflow_dispatch:
+  push:
+    paths: ['.github/workflows/bootstrap.yml']
 permissions:
   contents: write
 jobs:
