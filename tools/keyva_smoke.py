@@ -20,6 +20,8 @@ def tap(node):
 def find_text(tree,text):return next(n for n in tree.iter('node') if n.attrib.get('text','').casefold()==text.casefold())
 apk=next(pathlib.Path(sys.argv[1]).rglob('*.apk'))
 print(adb('install','-r',str(apk)),flush=True)
+print(adb('shell','am','start','-n','org.nexlibre.keyva/helium314.keyboard.settings.SettingsActivity'),flush=True)
+time.sleep(3)
 component='org.nexlibre.keyva/helium314.keyboard.latin.LatinIME'
 for attempt in range(30):
     if component in adb('shell','ime','list','-a','-s'):break
