@@ -15,7 +15,7 @@ public final class GeminiClient {
     private final AtomicBoolean cancelled = new AtomicBoolean();
     public void cancel() { cancelled.set(true); HttpsURLConnection c = connection; if (c != null) c.disconnect(); }
     public String correct(String text, String mode, KeyStoreConfig config) throws Exception {
-        if (text.isBlank() || text.length() > 12000) throw new IllegalArgumentException("Seleccioná entre 1 y 12000 caracteres");
+        if (text.trim().isEmpty() || text.length() > 12000) throw new IllegalArgumentException("Seleccioná entre 1 y 12000 caracteres");
         if (!config.enabled()) throw new IllegalStateException("Activá la IA en ajustes");
         String key = config.read(); if (key.isEmpty()) throw new IllegalStateException("Configurá una clave nueva en ajustes");
         String model = config.model(); if (!model.matches("gemini-[a-zA-Z0-9._-]{1,80}")) throw new IllegalArgumentException("Modelo inválido");

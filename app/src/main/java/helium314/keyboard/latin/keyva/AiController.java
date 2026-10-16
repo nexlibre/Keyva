@@ -116,7 +116,7 @@ public final class AiController {
     }
     private void correctSelection() {
         reset(); if (!safe()) return; InputConnection c=ime.getCurrentInputConnection(); String text=selected(c);
-        if (text.isBlank() || text.length()>12000) { toast("Seleccioná el texto a corregir (máximo 12000 caracteres)"); return; }
+        if (text.trim().isEmpty() || text.length()>12000) { toast("Seleccioná el texto a corregir (máximo 12000 caracteres)"); return; }
         preview(text,text,text,generation,c,false);
     }
     private void preview(String text, String original, String selection, int token, InputConnection connection, boolean dictation) {
@@ -146,7 +146,7 @@ public final class AiController {
             KeyStoreConfig config = new KeyStoreConfig(ime);
             if (!config.enabled()) { toast("Activá Gemini y configurá una clave nueva en Ajustes IA"); return; }
             final String input=editor.getText().toString(); final String style=mode.getSelectedItem().toString();
-            if (input.isBlank() || input.length()>12000) { toast("Máximo 12000 caracteres"); return; }
+            if (input.trim().isEmpty() || input.length()>12000) { toast("Máximo 12000 caracteres"); return; }
             correct.setEnabled(false); status.setText("Corrigiendo… Podés cancelar sin perder el original.");
             GeminiClient request=new GeminiClient(); if(client!=null)client.cancel(); client=request;
             worker.execute(() -> {

@@ -92,6 +92,8 @@ android {
         }
     }
 
+    testBuildType = "debugNoMinify"
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
