@@ -1,18 +1,18 @@
 # Beta 1.0.0 release gate
 
-Status: development, not a verified beta. Build and privacy policy unit tests passed in [run 38843209804](https://github.com/nexlibre/Keyva/actions/runs/38843209804) on 2026-10-16 UTC (2026-10-15 Nicaragua). Emulator checks are still running at the time of this update. No release may be published based only on compilation.
+Status: development, not a verified beta. Build, three privacy policy unit tests, and interactive IME smoke checks passed on Android 12 (API 31) and Android 13 (API 33) in [run 38843925323](https://github.com/nexlibre/Keyva/actions/runs/38843925323) on 2026-10-16 UTC (2026-10-15 Nicaragua). This does not verify real microphone input, Gemini or full traditional-keyboard regressions.
 
 | Check | Evidence / status |
 |---|---|
 | Source and history import | Upstream HeliBoard main 0c60dffb03a4e2e7a37cb82210f5299f93c03979; GPL-3.0 and other license files retained |
 | Privacy policy unit tests | PASS: API 31 Robolectric; reports attached to the linked run |
-| APK compilation, package, signature | PASS: org.nexlibre.keyva, API 31, apksigner verified; development signing only. APK SHA256: 21f8727b53d9af5b8768e292ba5b402765afcea803d5a17f758f02fc619a8cb4 |
-| Install, IME enable/default, settings launch | CI emulator smoke checks Android 12 and 13 |
-| Actual letters, numbers, symbols, languages, suggestions and correction | Pending interactive/device testing |
+| APK compilation, package, signature | PASS: org.nexlibre.keyva, API 31, apksigner verified; development signing only. APK SHA256: 564bc8ff4c685a47840500584a403dd4243ca6b47df563dc1f116f165ef57afd |
+| Install, IME enable/default, settings launch | PASS on both Android 12 and 13: install, default IME activation, settings launch; no AndroidRuntime fatal exception in the exercised flow |
+| Actual keyboard touch and selection preview | PASS on both emulators: a physical-coordinate key touch inserted text; IA selection preview opened and Back closed it |\n| Numbers, symbols, languages, suggestions, correction and manual preview editing | Pending broader interactive/device testing |
 | Clipboard, emoji, themes, height, vibration | Preserved upstream; pending regression testing |
 | Speech permission, listen, stop, cancel, offline language support | Implemented; pending actual microphone/service testing |
 | Gemini real request, cancellation, regional style | Pending a newly provisioned user key and online test; no old key reused |
-| Undo, preview, field changes, sensitive fields | Policy tested by CI; interactive integration checks pending |
+| Undo, preview, field changes, sensitive fields | Policy tested by CI; preview opening/cancel by Back tested. Undo, stale field and sensitive-field UI integration checks pending |
 | WhatsApp, Telegram, browser and editor transitions | Pending physical device testing |
 | Network failures, no internet, battery, memory/latency | Pending device testing |
 
