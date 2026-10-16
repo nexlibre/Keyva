@@ -705,6 +705,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onDestroy() {
+        if (keyvaAi != null) keyvaAi.close();
         mClipboardHistoryManager.onDestroy();
         mDictionaryFacilitator.closeDictionaries();
         mSettings.onDestroy();
@@ -762,6 +763,14 @@ public class LatinIME extends InputMethodService implements
         mKeyboardSwitcher.updateKeyboardTheme(mDisplayContext);
     }
 
+    public helium314.keyboard.latin.keyva.AiController keyvaAi;
+
+    public View keyvaAttach(View view) {
+        if (keyvaAi == null) keyvaAi = new helium314.keyboard.latin.keyva.AiController(this);
+        keyvaAi.attach(view);
+        return view;
+    }
+
     @Override
     public View onCreateInputView() {
         StatsUtils.onCreateInputView();
@@ -793,6 +802,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onStartInput(final EditorInfo editorInfo, final boolean restarting) {
+        if (keyvaAi != null) keyvaAi.reset();
         mHandler.onStartInput(editorInfo, restarting);
     }
 
@@ -804,6 +814,7 @@ public class LatinIME extends InputMethodService implements
 
     @Override
     public void onFinishInputView(final boolean finishingInput) {
+        if (keyvaAi != null) keyvaAi.reset();
         StatsUtils.onFinishInputView();
         mHandler.onFinishInputView(finishingInput);
         mStatsUtilsManager.onFinishInputView();
@@ -1429,7 +1440,8 @@ public class LatinIME extends InputMethodService implements
     // completely replace #onCodeInput.
     public void onEvent(@NonNull final Event event) {
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
-            mRichImm.switchToShortcutIme(this);
+            if (keyvaAi != null) keyvaAi.dictate();
+            return;
         }
         final InputTransaction completeInputTransaction =
                 mInputLogic.onCodeInput(mSettings.getCurrent(), event,

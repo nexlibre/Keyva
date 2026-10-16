@@ -572,7 +572,7 @@ public final class KeyboardSwitcher {
         prefs.registerOnSharedPreferenceChangeListener(mSuggestionStripView);
         prefs.registerOnSharedPreferenceChangeListener(mClipboardHistoryView);
         PointerTracker.switchTo(mKeyboardView);
-        return mCurrentInputView;
+        return mLatinIME.keyvaAttach(mCurrentInputView);
     }
 
     public CapsMode getKeyboardCapsMode() {

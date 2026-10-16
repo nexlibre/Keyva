@@ -1,0 +1,82 @@
+name: Keyva build and Android checks
+on:
+  push:
+    paths-ignore: ['docs/**', '**.md']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: keyva-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install Android toolchain
+        run: sdkmanager 'platforms;android-37' 'build-tools;36.0.0' 'ndk;28.0.13004108'
+      - name: Privacy policy unit tests
+        run: ./gradlew testDebugNoMinifyUnitTest --tests '*keyva*' --stacktrace
+      - name: Compile installable development APK
+        run: ./gradlew assembleDebugNoMinify --stacktrace
+      - name: Verify identity and signature
+        run: |
+          APK=$(find app/build/outputs/apk/debugNoMinify -name '*.apk' -print -quit)
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | tee apk-identity.txt
+          grep "package: name='org.nexlibre.keyva'" apk-identity.txt
+          grep "sdkVersion:'31'" apk-identity.txt
+          sha256sum "$APK" > SHA256SUMS
+      - name: Dependency inventory
+        run: ./gradlew :app:dependencies --configuration debugNoMinifyRuntimeClasspath > dependencies.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Keyva-development-${{ github.sha }}
+          path: |
+            app/build/outputs/apk/debugNoMinify/*.apk
+            SHA256SUMS
+            apk-identity.txt
+            dependencies.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-reports
+          path: app/build/reports/tests
+  android:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [31, 33]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Keyva-development-${{ github.sha }}
+          path: package
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          disable-animations: true
+          script: python3 tools/keyva_smoke.py package
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-${{ matrix.api }}-evidence
+          path: smoke-evidence

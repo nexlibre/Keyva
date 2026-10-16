@@ -8,6 +8,8 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -19,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
             android:icon="@mipmap/ic_launcher"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:allowBackup="true"
+            android:allowBackup="false"
             android:defaultToDeviceProtectedStorage="true"
             android:directBootAware="true"
             android:enableOnBackInvokedCallback="true"
@@ -51,6 +53,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
         </service>
 
         <!-- Activities -->
+        <activity android:name=".keyva.AiSettingsActivity" android:exported="false" android:directBootAware="false" android:excludeFromRecents="true" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
         <activity android:name="helium314.keyboard.settings.SettingsActivity"
                 android:theme="@style/platformActivityTheme"
                 android:icon="@mipmap/ic_launcher"
@@ -110,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 
         <!-- for pasting files from internal clipboard -->
         <provider android:name="helium314.keyboard.latin.database.ClipboardContentProvider"
-            android:authorities="@string/clipboard_provider_authority"
+            android:authorities="${applicationId}.clipprovider"
             android:enabled="true"
             android:grantUriPermissions="true"
             android:exported="false">
@@ -121,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 
         <!-- necessary for sending mail attachments, remove when data gathering phase is done (end of 2026 latest) -->
         <provider android:name="helium314.keyboard.settings.screens.gesturedata.GestureFileProvider"
-            android:authorities="@string/gesture_data_provider_authority"
+            android:authorities="${applicationId}.gestureprovider"
             android:enabled="true"
             android:grantUriPermissions="true"
             android:exported="false">
@@ -132,6 +135,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     </application>
 
     <queries>
+        <intent><action android:name="android.speech.RecognitionService" /></intent>
         <!-- To detect other IMEs -->
         <intent>
             <!-- changed to * as it's supposed to help with finding other keyboard apps, see https://github.com/HeliBorg/HeliBoard/issues/1340 -->

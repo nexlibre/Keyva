@@ -10,11 +10,11 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "helium314.keyboard"
-        minSdk = 21
+        applicationId = "org.nexlibre.keyva"
+        minSdk = 31
         targetSdk = 37
-        versionCode = 4201
-        versionName = "4.2"
+        versionCode = 1
+        versionName = "1.0.0-beta.1"
         ndk {
             abiFilters.clear()
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
@@ -40,7 +40,7 @@ android {
             // and for better performance in case users want to install a debug APK
             isMinifyEnabled = true
             isJniDebuggable = false
-            applicationIdSuffix = ".debug"
+            // Independent Keyva identity in all variants
         }
         create("runTests") { // build variant for running tests on CI that skips tests known to fail
             isMinifyEnabled = false
@@ -51,7 +51,7 @@ android {
             isMinifyEnabled = false
             isJniDebuggable = false
             signingConfig = signingConfigs.getByName("debug")
-            applicationIdSuffix = ".debug"
+            // Independent Keyva identity in all variants
             isDefault = true
         }
 
@@ -66,7 +66,7 @@ android {
             }
             variant.outputs.forEach { output ->
                 if (output is com.android.build.api.variant.impl.VariantOutputImpl) {
-                    output.outputFileName = "HeliBoard_${defaultConfig.versionName}-${variant.buildType}.apk"
+                    output.outputFileName = "Keyva_${defaultConfig.versionName}-${variant.buildType}.apk"
                 }
             }
         }
