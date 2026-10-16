@@ -35,11 +35,13 @@ public final class AiController {
     private int undoCursor = -1;
     private InputConnection undoConnection;
     private View root;
+    private View toolbar;
+    public int toolbarHeight() { return toolbar != null && toolbar.isShown() ? toolbar.getHeight() : 0; }
     public AiController(LatinIME ime) { this.ime = ime; }
     public void attach(View view) {
         reset(); root = view;
         LinearLayout frame = view.findViewById(R.id.main_keyboard_frame);
-        LinearLayout bar = new LinearLayout(ime); bar.setOrientation(LinearLayout.HORIZONTAL); bar.setBackgroundColor(Color.BLACK);
+        LinearLayout bar = new LinearLayout(ime); toolbar = bar; bar.setOrientation(LinearLayout.HORIZONTAL); bar.setBackgroundColor(Color.BLACK);
         add(bar,"Voz", this::dictate); add(bar,"IA", this::correctSelection); add(bar,"Deshacer", this::undo); add(bar,"Ajustes IA", this::settings);
         // InputView is retained, so HeliBoard's insets, suggestions, clipboard and emoji views remain intact.
         frame.addView(bar, 0, new LinearLayout.LayoutParams(-1, (int)(48 * ime.getResources().getDisplayMetrics().density)));
